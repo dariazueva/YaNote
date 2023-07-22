@@ -35,10 +35,15 @@ class TestRoutes(TestCase):
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_detail_page(self):
-        self.client.force_login(self.author)
-        url = reverse('notes:detail', args=(self.note.slug,))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+        users_statuses = (
+            (self.author, HTTPStatus.OK),
+            (self.reader, HTTPStatus.NOT_FOUND),
+        )
+        for user, status in users_statuses:
+            self.client.force_login(user)
+            url = reverse('notes:detail', args=(self.note.slug,))
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, status)
 
 
 
