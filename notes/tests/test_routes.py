@@ -34,16 +34,18 @@ class TestRoutes(TestCase):
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
-    def test_detail_page(self):
+    def test_availability_for_note_show_and_edit_and_delete(self):
         users_statuses = (
             (self.author, HTTPStatus.OK),
             (self.reader, HTTPStatus.NOT_FOUND),
         )
         for user, status in users_statuses:
             self.client.force_login(user)
-            url = reverse('notes:detail', args=(self.note.slug,))
-            response = self.client.get(url)
-            self.assertEqual(response.status_code, status)
+            for name in ('notes:detail', 'notes:edit', 'notes:delete'):
+                with self.subTest(user=user, name=name):
+                    url = reverse(name, args=(self.note.slug,))
+                    response = self.client.get(url)
+                    self.assertEqual(response.status_code, status)
 
 
 
