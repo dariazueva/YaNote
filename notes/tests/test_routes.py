@@ -16,13 +16,13 @@ class TestRoutes(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.author = User.objects.create(username='Брэд Пит')
-        cls.notes = Note.objects.create(title='Заголовок', text='Текст', author=cls.author)
+        cls.note = Note.objects.create(title='Заголовок', text='Текст', author=cls.author)
         cls.reader = User.objects.create(username='Анон')
 
     def test_pages_availability(self):
         urls = (
             ('notes:home', None),
-            # ('notes:detail', (self.notes.slug,)),
+            # ('notes:list', None),
             ('users:login', None),
             ('users:logout', None),
             ('users:signup', None),
@@ -33,6 +33,12 @@ class TestRoutes(TestCase):
                 url = reverse(name, args=args)
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_detail_page(self):
+        self.client.force_login(self.author)
+        url = reverse('notes:detail', args=(self.note.slug,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
 
 
