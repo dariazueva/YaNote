@@ -48,6 +48,12 @@ class TestRoutes(TestCase):
                     response = self.client.get(url)
                     self.assertEqual(response.status_code, status)
 
+    def test_availability_for_note_add(self):
+        self.client.force_login(self.author)
+        url = reverse('notes:add', None)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
     def test_a_redirect_for_anonymous_client(self):
         login_url = reverse('users:login')
         for name in ('notes:edit', 'notes:delete'):
