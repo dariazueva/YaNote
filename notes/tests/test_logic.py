@@ -9,22 +9,31 @@ from notes.models import Note
 User = get_user_model()
 
 
-# class TestNoteCreation(TestCase):
-#     NOTE_TEXT = 'Текст заметки'
+class TestNoteCreation(TestCase):
+    NOTE_TEXT = 'Текст заметки'
 
-#     @classmethod
-#     def setUpTestData(cls):
-#         cls.url = reverse('notes:add', None)
-#         cls.user = User.objects.create(username='Бен Афлик')
-#         cls.note = Note.objects.create(title='Заголовок', text='Текст', author=cls.user)
-#         cls.auth_client = Client()
-#         cls.auth_client.force_login(cls.user)
-#         cls.form_data = {'text': cls.NOTE_TEXT}
+    @classmethod
+    def setUpTestData(cls):
+        cls.url = reverse('notes:add', None)
+        cls.user = User.objects.create(username='Бен Афлик')
+        cls.note = Note.objects.create(title='Заголовок', text='Текст', author=cls.user)
+        cls.auth_client = Client()
+        cls.auth_client.force_login(cls.user)
+        cls.form_data = {'text': cls.NOTE_TEXT}
 
-#     def test_anonymous_user_cant_create_note(self):
-#         self.client.post(self.url, data=self.form_data)
-#         notes_count = Note.objects.count()
-#         self.assertEqual(notes_count, 0)
+    # def test_anonymous_user_cant_create_note(self):
+    #     self.client.post(self.url, data=self.form_data)
+    #     notes_count = Note.objects.count()
+    #     self.assertEqual(notes_count, 0)
+
+    def test_user_can_create_note(self):
+        response = self.auth_client.post(self.url, data=self.form_data)
+        self.assertRedirects(response, 'notes:success')
+        note_count = Note.objects.count()
+        self.assertEqual(note_count, 1)
+        note = Note.objects.get()
+        self.assertEqual(note.text, self.NOTE_TEXT)
+        self.assertEqual(note.author, self.user)
 
 
 class TestNoteEditDelete(TestCase):
@@ -34,14 +43,12 @@ class TestNoteEditDelete(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.author = User.objects.create(username='Автор заметки')
-        # cls.note = Note.objects.create(title='Заголовок', text='Текст', author=cls.author)
         cls.note = Note.objects.create(
             title='Заголовок',
             slug='Slug',
             author=cls.author,
             text=cls.NOTE_TEXT
         )
-        # note_url = reverse('notes:detail', args=(cls.note.slug,))
         cls.author_client = Client()
         cls.author_client.force_login(cls.author)
         cls.reader = User.objects.create(username='Читатель')
@@ -49,7 +56,6 @@ class TestNoteEditDelete(TestCase):
         cls.reader_client.force_login(cls.reader)
         cls.edit_url = reverse('notes:edit', args=(cls.note.slug,)) 
         cls.delete_url = reverse('notes:delete', args=(cls.note.slug,))
-        # cls.done_url = reverse('notes:success', None)
         cls.form_data = {'text': cls.NEW_NOTE_TEXT}
         cls.url_to_done = reverse('notes:success', None)
 

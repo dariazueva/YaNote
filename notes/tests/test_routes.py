@@ -51,6 +51,7 @@ class TestRoutes(TestCase):
         urls = (
             ('notes:add', None),
             ('notes:list', None),
+            ('notes:success', None),
         )
         for name, args in urls:
             with self.subTest(name=name):
@@ -69,7 +70,9 @@ class TestRoutes(TestCase):
 
     def test_b_redirect_for_anonymous_client(self):
         login_url = reverse('users:login')
-        url = reverse('notes:add', None)
-        redirect_url = f'{login_url}?next={url}'
-        response = self.client.get(url)
-        self.assertRedirects(response, redirect_url)
+        for name in ('notes:add', 'notes:list', 'notes:success'):
+            with self.subTest(name=name):
+                url = reverse(name, None)
+                redirect_url = f'{login_url}?next={url}'
+                response = self.client.get(url)
+                self.assertRedirects(response, redirect_url)
