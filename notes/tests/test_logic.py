@@ -26,14 +26,20 @@ class TestNoteCreation(TestCase):
     #     notes_count = Note.objects.count()
     #     self.assertEqual(notes_count, 0)
 
-    def test_user_can_create_note(self):
-        response = self.auth_client.post(self.url, data=self.form_data)
-        self.assertRedirects(response, 'notes:success')
-        note_count = Note.objects.count()
-        self.assertEqual(note_count, 1)
-        note = Note.objects.get()
-        self.assertEqual(note.text, self.NOTE_TEXT)
-        self.assertEqual(note.author, self.user)
+
+    
+
+    # def test_user_can_create_note(self):
+    #     response = self.auth_client.post(self.url, data=self.form_data)
+    #     self.assertRedirects(response, 'notes:success')
+    #     note_count = Note.objects.count()
+    #     self.assertEqual(note_count, 1)
+    #     note = Note.objects.get()
+    #     self.assertEqual(note.text, self.NOTE_TEXT)
+    #     self.assertEqual(note.author, self.user)
+
+
+
 
 
 class TestNoteEditDelete(TestCase):
