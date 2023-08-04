@@ -24,6 +24,8 @@ class TestNoteCreation(TestCase):
         cls.auth_client = Client()
         cls.auth_client.force_login(cls.user)
         cls.form_data = {'text': cls.NOTE_TEXT, 'title': cls.NOTE_TITLE, 'slug': cls.NOTE_SLUG, 'author': cls.auth_client}
+        cls.url_to_add = reverse('notes:add')
+        cls.url_to_done = reverse('notes:success', None)
 
     def test_anonymous_user_cant_create_note(self):
         self.client.post(self.url, data=self.form_data)
@@ -40,10 +42,21 @@ class TestNoteCreation(TestCase):
         self.assertEqual(note.slug, self.NOTE_SLUG)
         self.assertEqual(note.text, self.NOTE_TEXT)
         self.assertEqual(note.author, self.user)
+    
+    def test_empty_slug(self):
+        self.form_data.pop('slug')
+        response = self.auth_client.post(self.url_to_add, data=self.form_data)
+        self.assertRedirects(response, self.url_to_done)
+        self.assertEqual(Note.objects.count(), self.notes_counts + 1)
+        new_note = Note.objects.get()
+        expected_slug = slugify(self.form_data['title'])
+        self.assertEqual(new_note.slug, expected_slug)
 
 
 class TestNoteEditDelete(TestCase):
+    NOTE_TITLE = 'Текст заголовка'
     NOTE_TEXT = 'Текст заметки'
+    NOTE_SLUG = 'slug'
     NEW_NOTE_TEXT = 'Обновлённая заметка'
     NEW_NOTE_TITLE = 'Обновлённый заголовок заметки'
     NEW_NOTE_SLUG = 'new_slug'
@@ -99,12 +112,3 @@ class TestNoteEditDelete(TestCase):
         response = self.author_client.post(self.url_to_add, data=self.form_data)
         self.assertFormError(response, 'form', 'slug', errors=(self.note.slug + WARNING))
         self.assertEqual(Note.objects.count(), self.notes_counts + 1)
-
-    def test_empty_slug(self):
-        self.form_data.pop('slug')
-        response = self.author_client.post(self.url_to_add, data=self.form_data)
-        self.assertRedirects(response, self.url_to_done)
-        self.assertEqual(Note.objects.count(), self.notes_counts + 1)
-        new_note = Note.objects.get()
-        expected_slug = slugify(self.form_data['title'])
-        self.assertEqual(new_note.slug, expected_slug)
